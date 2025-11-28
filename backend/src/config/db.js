@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 export const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_CONNECTIONSTRING);
@@ -10,4 +9,4 @@ export const connectDB = async () => {
         console.error("Lỗi khi kết nối CSDL:", error);
         process.exit(1); // exit with error
     }
-}
+};
