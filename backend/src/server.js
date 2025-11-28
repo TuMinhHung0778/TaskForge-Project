@@ -23,6 +23,7 @@ app.use(express.json()); // để đọc được req.body từ const {title} - 
 
 app.use("/api/tasks", taskRoute);
 
+// để đảm bảo khi connect với db xong thì server mới thực sự chạy ở cổng 5001
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log(`server bắt đầu trên cổng ${PORT}`);
