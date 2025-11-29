@@ -25,4 +25,5 @@ const taskScheme = new mongoose.Schema(
 
 //  tạo model
 const Task = mongoose.model("Task", taskScheme);
+
 export default Task;
