@@ -2,11 +2,13 @@ import express from "express";
 import taskRoute from './routes/tasksRouters.js';
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
-import cors from "cors"
+import cors from "cors";
+import path from "path";
 // Load env from the src folder where the .env is located
 dotenv.config();
 
 const PORT = process.env.PORT || 5001;
+const __dirname = path.resolve();
 
 const app = express();
 
@@ -20,10 +22,19 @@ app.use(express.json()); // để đọc được req.body từ const {title} - 
      --> NÓI DỄ HIỂU THÌ MIDDLEWARE GIỐNG NHƯ 1 TRẠM KIỂM SOÁT REQUEST ĐI QUA TỪNG TRẠM ĐƯỢC XỬ LÝ THÊM 1 LỚP CHO ĐẾN KHI CUÔI CÙNG TỚI ROUTER CHÍNH
  */}
 
-app.use(cors({ origin: "http://localhost:5173" }))
-
+if (process.env.NODE_ENV !== "production") {
+    app.use(cors({ origin: "http://localhost:5173" }));
+}
 
 app.use("/api/tasks", taskRoute);
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+    })
+}
 
 // để đảm bảo khi connect với db xong thì server mới thực sự chạy ở cổng 5001
 connectDB().then(() => {
