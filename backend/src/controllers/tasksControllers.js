@@ -1,7 +1,34 @@
 import Task from "../models/Task.js";
 
 // GET -> trả về danh sách việc cần làm
-export const getAllTasks = async (request, response) => {
+export const getAllTasks = async (req, res) => {
+    const { filter = 'today' } = req.query;
+    const now = new Date();
+    let startDate;
+
+    switch (filter) {
+        case "today": {
+            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // 2025-12-4 00:00
+            break;
+        }
+        case "week": {
+            const mondayDate = now.getDate() - (now.getDate() - 1) - (now.getDay() === 0 ? 7 : 0);
+            startDate = new Date(now.getFullYear(), now.getMonth(), mondayDate);
+            break;
+        }
+        case "month": {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        }
+        case "all":
+        default: {
+            startDate = null;
+        }
+    }
+
+    const query = startDate ? { createdAt: { $gte: startDate } } : {};
+
+
     try {
         // const tasks = await Task.find().sort({ createdAt: -1 });
         // const activeCount = await Task.countDocuments({ status: "active" }); // đếm số lượng nhiệm vụ có status = "active"
@@ -9,6 +36,7 @@ export const getAllTasks = async (request, response) => {
 
         // use aggregation pipline
         const result = await Task.aggregate([
+            { $match: query },
             {
                 $facet: {
                     tasks: [{ $sort: { createdAt: -1 } }],
@@ -22,10 +50,10 @@ export const getAllTasks = async (request, response) => {
         const activeCount = result[0].activeCount[0]?.count || 0; // kiểm tra xem item đầu tiên của mảng activeCount có phải undefined không? || nếu là mảng rổng thì giá trị default = 0
         const completeCount = result[0].completeCount[0]?.count || 0;
 
-        response.status(200).json({ tasks, activeCount, completeCount });
+        res.status(200).json({ tasks, activeCount, completeCount });
     } catch (error) {
         console.error("Lỗi khi gọi getAllTasks", error);
-        response.status(500).json({ message: "Lỗi hệ thống" });
+        res.status(500).json({ message: "Lỗi hệ thống" });
     }
 }
 

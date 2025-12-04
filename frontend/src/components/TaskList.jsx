@@ -1,7 +1,7 @@
 import TaskCard from "./TaskCard";
 import TaskEmptyState from "./TaskEmptyState";
 
-const TaskList = ({ filteredTasks, filter }) => {
+const TaskList = ({ filteredTasks, filter, handleTaskChanged }) => {
   // data mẫu để test
   // const filteredTasks = [
   //   {
@@ -27,7 +27,12 @@ const TaskList = ({ filteredTasks, filter }) => {
   return (
     <div className="space-y-3">
       {filteredTasks.map((task, index) => (
-        <TaskCard key={task._id ?? index} task={task} index={index} />
+        <TaskCard
+          key={task._id ?? index}
+          task={task}
+          index={index}
+          handleTaskChanged={handleTaskChanged}
+        />
       ))}
     </div>
   );

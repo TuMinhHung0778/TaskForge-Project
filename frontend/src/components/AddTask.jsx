@@ -2,10 +2,42 @@ import { Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
+import { useState } from "react";
+import { toast } from "sonner";
+import api from "@/lib/axios";
 
+const AddTask = ({ handleNewTaskAdded }) => {
+  // logic them nhiem vu moi tu frontend trong input
+  const [newTaskTitle, setNewTaskTitle] = useState("");
 
-const AddTask = () => {
- 
+  // hàm gửi request lên server để thêm task mới
+  const addTask = async () => {
+    if (newTaskTitle.trim()) {
+      try {
+        // await axios.post("http://localhost:5001/api/tasks" // // lib/axios.js
+        await api.post("/tasks", { title: newTaskTitle });
+        toast.success(`Nhiệm vụ ${newTaskTitle} đã được thêm vào!`);
+
+        // cần thông báo với component cha là user vừa mới tạo nhiệm mới để nó render lại các component khác, cho nên cần thêm 1 props là handleNewTaskAdded(), đây là hàm callback truyền từ cha xuống con
+        handleNewTaskAdded();
+      } catch (error) {
+        console.error("Lỗi xảy ra khi thêm task.", error);
+        toast.error("Lỗi xảy ra khi thêm nhiệm vụ mới.");
+      }
+
+      // dù thành công hay thất thì cũng phải reset input về rỗng
+      setNewTaskTitle("");
+    } else {
+      toast.error("Bạn cần nhập nội dung của nhiệm vụ.");
+    }
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      addTask();
+    }
+  };
+
   return (
     <Card className="p-6 border-0 bg-gradient-card shadow-custom-lg">
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -13,9 +45,18 @@ const AddTask = () => {
           type="text"
           placeholder="Cần phải làm gì?"
           className="h-12 text-base bg-slate-50 sm:flex-1 border-border/50 focus:border-primary/50 focus:ring-primary/20"
+          value={newTaskTitle}
+          onChange={(even) => setNewTaskTitle(even.target.value)}
+          onKeyPress={handleKeyPress}
         />
 
-        <Button variant="gradient" size="xl" className="px-6">
+        <Button
+          variant="gradient"
+          size="xl"
+          className="px-6"
+          onClick={addTask}
+          disabled={!newTaskTitle.trim()}
+        >
           <Plus className="size-5" />
           Thêm
         </Button>
